@@ -23,7 +23,12 @@ jobs:
     - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
     - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
     - name: Create Tunnel
-      run: Start-Process powershell.exe -ArgumentList "-NoExit -Command `".\ngrok\ngrok.exe tcp 3389`""
+      run: |
+        while ($true) {
+          Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-NoExit","-Command",".\ngrok\ngrok.exe tcp 3389"
+          Start-Sleep -Seconds 60
+        }
+
 
 
       
