@@ -13,11 +13,17 @@ jobs:
       run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
     - name: Extract ngrok
       run: Expand-Archive ngrok.zip
-    - name: Install Jekyll
+    - name: Install build tools
       run: |
-        # Install Jekyll and other dependencies
+        # Install build tools
         choco install ruby --version=2.7.3 -y
-        gem install jekyll
+        choco install ruby.devkit -y
+        ridk install 1
+    - name: Install Jekyll dependencies
+      run: |
+        # Install Jekyll dependencies
+        gem install bundler jekyll
+        bundle install
     - name: Build Web Page
       run: |
         # Create a simple web page using Jekyll
