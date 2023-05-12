@@ -13,11 +13,12 @@ jobs:
       run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
     - name: Extract ngrok
       run: Expand-Archive ngrok.zip
-    - name: Create HTML file
+    - name: Create Web Page
+      run: echo "<h1>Hello, world!</h1>" > index.html
+    - name: Serve Web Page
       run: |
-        echo "<html><body><h1>Hello, world!</h1></body></html>" > index.html
-    - name: Start Web Server
-      run: python -m http.server 8000
+        .\ngrok\ngrok.exe http -host-header="localhost:80" 80
+
 
 
 
