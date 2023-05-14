@@ -2,24 +2,41 @@ name: Expose Local Web Page
 
 on:
   push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Download ngrok
-      run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
-    - name: Extract ngrok
-      run: Expand-Archive ngrok.zip
-    - name: Authenticate ngrok
-      run: .\ngrok\ngrok.exe authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
-    - name: Create Web Page
-      run: echo "<h1>Welcome to My Web Page!</h1><p>This is a sample web page.</p>" > index.html
-    - name: Serve Web Page
-      run: |
-        .\ngrok\ngrok.exe http -host-header="localhost:80" 80
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build web page
+        run: npm run build
+
+      - name: Download ngrok
+        run: |
+          mkdir ngrok
+          cd ngrok
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+
+      - name: Authenticate ngrok
+        run: ./ngrok/ngrok authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
+
+      - name: Start ngrok
+        run: ./ngrok/ngrok http 80
 
 
 
