@@ -19,30 +19,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Navigate to project directory
-        run: cd /path/to/your/project
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build web page
-        run: npm run build
-        
-      - name: Start web page on port 8080
-        run: npm run start -- --port 8080
-
-      - name: Download ngrok
+      - name: Install ngrok
         run: |
-          mkdir ngrok
-          cd ngrok
-          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-          unzip ngrok-stable-linux-amd64.zip
+          sudo apt-get install unzip -y
+          curl -o ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok.zip
 
       - name: Authenticate ngrok
-        run: ./ngrok/ngrok authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
+        run: ./ngrok authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
 
-      - name: Start ngrok
-        run: ./ngrok/ngrok http -host-header="localhost:8080" 8080
+      - name: Start ngrok and expose web page
+        run: |
+          nohup ./ngrok http 8000 &
+          sleep 5
+          curl -s http://localhost:4040/api/tunnels | grep -Eo "https://[^,\"]+" | head -1 > ngrok_url.txt
+          cat ngrok_url.txt
+
+      # Rest of the workflow...
+
 
 
 
