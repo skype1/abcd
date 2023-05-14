@@ -21,11 +21,11 @@ jobs:
 
       - name: Create ngrok configuration file
         run: |
-          echo "authtoken: 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1" > ngrok.yml
-          echo "tunnels:" >> ngrok.yml
-          echo "  web:" >> ngrok.yml
-          echo "    addr: 8080" >> ngrok.yml
-          echo "    proto: http" >> ngrok.yml
+          echo "authtoken: 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1" > $GITHUB_WORKSPACE/ngrok.yml
+          echo "tunnels:" >> $GITHUB_WORKSPACE/ngrok.yml
+          echo "  web:" >> $GITHUB_WORKSPACE/ngrok.yml
+          echo "    addr: 8080" >> $GITHUB_WORKSPACE/ngrok.yml
+          echo "    proto: http" >> $GITHUB_WORKSPACE/ngrok.yml
 
       - name: Download ngrok
         run: |
@@ -35,7 +35,7 @@ jobs:
           unzip ngrok-stable-linux-amd64.zip
 
       - name: Start ngrok
-        run: ./ngrok/ngrok start --all --config=./ngrok.yml
+        run: ./ngrok/ngrok start --all --config=$GITHUB_WORKSPACE/ngrok.yml
 
 
 
