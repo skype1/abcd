@@ -11,20 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build web page
-        run: npm run build
-
       - name: Download ngrok
         run: |
           mkdir ngrok
@@ -36,7 +22,7 @@ jobs:
         run: ./ngrok/ngrok authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
 
       - name: Start ngrok
-        run: ./ngrok/ngrok http 80
+        run: ./ngrok/ngrok http -host-header="localhost:80" 80
 
 
 
