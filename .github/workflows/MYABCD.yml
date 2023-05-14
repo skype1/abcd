@@ -35,7 +35,8 @@ jobs:
           unzip ngrok-stable-linux-amd64.zip
 
       - name: Start ngrok
-        run: ./ngrok/ngrok start --all --config=../ngrok.yml
+        run: ./ngrok/ngrok start --all --config=./ngrok.yml
+
 
 
 
