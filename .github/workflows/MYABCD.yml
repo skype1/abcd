@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Navigate to project directory
-        run: cd path/to/project
+        run: cd /path/to/your/project
 
       - name: Install dependencies
         run: npm install
