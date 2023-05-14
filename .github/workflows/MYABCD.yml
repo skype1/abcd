@@ -11,8 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build web page
+        run: npm run build
+
+      - name: Start web page on port 8080
+        run: npm run start -- --port 8080
 
       - name: Download ngrok
         run: |
@@ -24,14 +38,9 @@ jobs:
       - name: Authenticate ngrok
         run: ./ngrok/ngrok authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
 
-      - name: Start local web server
-        run: python -m http.server 8000 &
+      - name: Start ngrok
+        run: ./ngrok/ngrok http -host-header="localhost:8080" 8080
 
-      - name: Wait for server to start
-        run: sleep 2
-
-      - name: Expose local web server
-        run: ./ngrok/ngrok http 8000
 
 
 
