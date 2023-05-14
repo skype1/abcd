@@ -21,21 +21,26 @@ jobs:
 
       - name: Install ngrok
         run: |
-          sudo apt-get install unzip -y
-          curl -o ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-          unzip ngrok.zip
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
 
       - name: Authenticate ngrok
         run: ./ngrok authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
 
-      - name: Start ngrok and expose web page
+      - name: Start ngrok
         run: |
-          nohup ./ngrok http 8000 &
+          ./ngrok http 8000 > /dev/null &
           sleep 5
-          curl -s http://localhost:4040/api/tunnels | grep -Eo "https://[^,\"]+" | head -1 > ngrok_url.txt
-          cat ngrok_url.txt
 
-      # Rest of the workflow...
+      - name: Get ngrok public URL
+        id: ngrok
+        run: |
+          echo "::set-output name=url::$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')"
+
+      - name: Display ngrok public URL
+        run: |
+          echo "Web page URL: ${{ steps.ngrok.outputs.url }}"
+
 
 
 
