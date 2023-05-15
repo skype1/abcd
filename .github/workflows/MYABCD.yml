@@ -1,59 +1,30 @@
-name: Expose Local Web Page
+name: CI
 
 on:
   push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install ngrok
-        run: |
-          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-          unzip ngrok-stable-linux-amd64.zip
-
-      - name: Authenticate ngrok
-        run: ./ngrok authtoken 2BhG4dIUyIvGKAYejnf3NES29Ph_4YyyiswK8LAxMswcjExx1
-
-      - name: Start ngrok
-        run: |
-          ./ngrok http 8000 > /dev/null &
-          sleep 5
-
-      - name: Get ngrok public URL
-        id: ngrok
-        run: |
-          echo "::set-output name=url::$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')"
-
-      - name: Display ngrok public URL
-        run: |
-          echo "Web page URL: ${{ steps.ngrok.outputs.url }}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
+    - name: Download
+      run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+    - name: Extract
+      run: Expand-Archive ngrok.zip
+    - name: Auth
+      run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+      env:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Enable TS
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+    - run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+    - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
+    - name: Create Tunnel
+      run: |
+        while ($true) {
+          Start-Process -NoNewWindow -FilePath "powershell" -ArgumentList "-NoExit","-Command",".\ngrok\ngrok.exe tcp 3389"
+          Start-Sleep -Seconds 60
+        }
