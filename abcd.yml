@@ -1,15 +1,13 @@
-name: FreeRDP
+name: FreeRDP with ngrok
 
-
-on: [push, workflow_dispatch]
-
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
-
   build:
+    runs-on: windows-latest
 
-
-       runs-on: windows-latest
     services:
       ngrok:
         image: mcr.microsoft.com/windows/nanoserver
@@ -17,19 +15,42 @@ jobs:
           --name ngrok
         ports:
           - 3389/tcp
+
     steps:
-      - name: Download
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Download ngrok
         run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
-      - name: Extract
+
+      - name: Extract ngrok
         run: Expand-Archive ngrok.zip
-      - name: Auth
+
+      - name: Authenticate ngrok
         run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
         env:
           NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-      - name: Enable TS
-        run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
-      - run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-      - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
-      - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
-      - name: Create Tunnel
-        run: .\ngrok\ngrok.exe tcp 3389
+
+      - name: Enable Remote Desktop
+        run: |
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+          Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
+
+      - name: Create ngrok Tunnel
+        run: powershell -NoExit -Command ".\ngrok\ngrok.exe tcp 3389"
+
+      - name: Sleep for ngrok to initialize (adjust as needed)
+        run: Start-Sleep -Seconds 10
+
+      - name: Run your FreeRDP commands
+        run: | 
+          # Add your FreeRDP commands here using the ngrok address, e.g., mstsc /v:<ngrok_address>
+
+  cleanup_ngrok:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - name: Stop ngrok service
+        run: Stop-Service -Name ngrok
