@@ -39,11 +39,11 @@ jobs:
           Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
 
       - name: Create ngrok Tunnel
-  run: cmd /c 'powershell -Command ".\ngrok\ngrok.exe tcp 3389"'
-
-
-      - name: Sleep for ngrok to initialize (adjust as needed)
-        run: Start-Sleep -Seconds 10
+        run: |
+          Start-Process powershell -ArgumentList '-Command', '.\ngrok\ngrok.exe tcp 3389' -Verb RunAs
+          while ($true) {
+              Start-Sleep -Seconds 3600  # Sleep for an hour, adjust as needed
+          }
 
       - name: Run your FreeRDP commands
         run: | 
